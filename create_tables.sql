@@ -109,67 +109,42 @@ CREATE TABLE ORDER_ITEMS (
 ALTER TABLE HARVESTED_CROPS ADD CONSTRAINT fk_order_item 
     FOREIGN KEY (order_item_id) REFERENCES ORDER_ITEMS(order_item_id);
 
--- Insert sample data
-INSERT INTO CUSTOMERS VALUES (1, 'John', 'Doe', 'john@email.com', '555-0101', '123 Main St');
-INSERT INTO CUSTOMERS VALUES (2, 'Jane', 'Smith', 'jane@email.com', '555-0102', '456 Oak Ave');
-INSERT INTO CUSTOMERS VALUES (3, 'Bob', 'Johnson', 'bob@email.com', '555-0103', '789 Pine Rd');
-INSERT INTO CUSTOMERS VALUES (4, 'Alice', 'Williams', 'alice@email.com', '555-0104', '321 Elm St');
-INSERT INTO CUSTOMERS VALUES (5, 'Charlie', 'Brown', 'charlie@email.com', '555-0105', '654 Maple Dr');
+    ALTER TABLE CUSTOMERS 
+ADD CONSTRAINT unique_customer_email 
+    UNIQUE (email);
 
-INSERT INTO GREENHOUSES VALUES (1, 'North Wing', 100);
-INSERT INTO GREENHOUSES VALUES (2, 'South Wing', 120);
-INSERT INTO GREENHOUSES VALUES (3, 'East Wing', 80);
+ALTER TABLE PLANT_BEDS 
+ADD CONSTRAINT unique_crop_per_bed_per_cycle 
+    UNIQUE (plant_bed_id, growth_cycle_id);
 
-INSERT INTO CROP_TYPES VALUES (1, 'Tomatoes', 'Temp: 20-25C, Humidity: 60-80%', 90, 5.99);
-INSERT INTO CROP_TYPES VALUES (2, 'Lettuce', 'Temp: 15-20C, Humidity: 50-70%', 45, 3.99);
-INSERT INTO CROP_TYPES VALUES (3, 'Cucumbers', 'Temp: 22-28C, Humidity: 70-90%', 60, 4.99);
+ALTER TABLE SENSORS 
+ADD CONSTRAINT unique_sensor_per_bed 
+    UNIQUE (plant_bed_id, sensor_type);
 
--- Create users and roles
-CREATE ROLE admin_role;
-CREATE ROLE technician_role;
-CREATE ROLE agronomist_role;
-CREATE ROLE sales_manager_role;
-CREATE ROLE customer_role;
+ALTER TABLE SENSOR_LOGS 
+ADD CONSTRAINT unique_timestamp_per_sensor 
+    UNIQUE (sensor_id, timestamp);
+-- Check Constraints
+ALTER TABLE PLANT_BEDS 
+ADD CONSTRAINT chk_capacity 
+    CHECK (planted_quantity <= capacity);
 
--- Grant privileges to roles
-GRANT ALL PRIVILEGES ON CUSTOMERS TO admin_role;
-GRANT ALL PRIVILEGES ON GREENHOUSES TO admin_role;
-GRANT ALL PRIVILEGES ON CROP_TYPES TO admin_role;
-GRANT ALL PRIVILEGES ON PLANT_BEDS TO admin_role;
-GRANT ALL PRIVILEGES ON GROWTH_CYCLE TO admin_role;
-GRANT ALL PRIVILEGES ON HARVESTED_CROPS TO admin_role;
-GRANT ALL PRIVILEGES ON SENSORS TO admin_role;
-GRANT ALL PRIVILEGES ON SENSOR_LOGS TO admin_role;
-GRANT ALL PRIVILEGES ON ORDERS TO admin_role;
-GRANT ALL PRIVILEGES ON ORDER_ITEMS TO admin_role;
+ALTER TABLE HARVESTED_CROPS 
+ADD CONSTRAINT chk_minimum_harvest_quantity 
+    CHECK (quantity_kg > 0);
 
--- Technician privileges
-GRANT SELECT ON PLANT_BEDS TO technician_role;
-GRANT SELECT ON CROP_TYPES TO technician_role;
-GRANT SELECT ON SENSORS TO technician_role;
-GRANT SELECT, INSERT, UPDATE ON SENSOR_LOGS TO technician_role;
-GRANT SELECT ON GROWTH_CYCLE TO technician_role;
+ALTER TABLE HARVESTED_CROPS 
+ADD CONSTRAINT chk_available_quantity 
+    CHECK (available_quantity_kg <= quantity_kg);
 
--- Agronomist privileges
-GRANT SELECT, UPDATE ON PLANT_BEDS TO agronomist_role;
-GRANT SELECT, UPDATE ON CROP_TYPES TO agronomist_role;
-GRANT SELECT, UPDATE ON GROWTH_CYCLE TO agronomist_role;
-GRANT SELECT ON SENSOR_LOGS TO agronomist_role;
+ALTER TABLE ORDER_ITEMS 
+ADD CONSTRAINT chk_order_item_quantity 
+    CHECK (quantity_kg > 0);
 
--- Sales Manager privileges
-GRANT SELECT ON HARVESTED_CROPS TO sales_manager_role;
-GRANT SELECT ON ORDERS TO sales_manager_role;
-GRANT SELECT ON ORDER_ITEMS TO sales_manager_role;
-GRANT SELECT ON CUSTOMERS TO sales_manager_role;
+ALTER TABLE GROWTH_CYCLE 
+ADD CONSTRAINT chk_growth_cycle_stage 
+    CHECK (stage IN ('Seedling', 'Vegetative', 'Flowering', 'Harvest'));
 
--- Customer privileges
-CREATE OR REPLACE VIEW customer_orders AS
-SELECT o.*, oi.order_item_id, oi.quantity_kg, hc.crop_type_id
-FROM ORDERS o
-JOIN ORDER_ITEMS oi ON o.order_id = oi.order_id
-JOIN HARVESTED_CROPS hc ON oi.harvest_id = hc.harvest_id;
-
-GRANT SELECT ON customer_orders TO customer_role;
 
 -- Create useful views
 CREATE OR REPLACE VIEW crop_status AS
@@ -200,3 +175,6 @@ JOIN GREENHOUSES gh ON pb.greenhouse_id = gh.greenhouse_id
 GROUP BY s.sensor_type, pb.slot_code, gh.location;
 
 COMMIT;
+
+
+
