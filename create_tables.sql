@@ -2,24 +2,27 @@
 SET SERVEROUTPUT ON;
 WHENEVER SQLERROR EXIT SQL.SQLCODE;
 
--- Clean up existing objects
+-- Clean up existing objects and tables
 BEGIN
     -- Drop tables in correct order to handle dependencies
     FOR t IN (SELECT table_name 
               FROM user_tables 
               WHERE table_name IN ('ORDER_ITEMS', 'SENSOR_LOGS', 'SENSORS', 'ORDERS', 
-                                 'HARVESTED_CROPS', 'GROWTH_CYCLE', 'PLANT_BEDS', 
-                                 'CROP_TYPES', 'GREENHOUSES', 'CUSTOMERS')) 
+                                   'HARVESTED_CROPS', 'GROWTH_CYCLE', 'PLANT_BEDS', 
+                                   'CROP_TYPES', 'GREENHOUSES', 'CUSTOMERS')) 
     LOOP
-        EXECUTE IMMEDIATE 'DROP TABLE ' || t.table_name || ' CASCADE CONSTRAINTS';
-    EXCEPTION
-        WHEN OTHERS THEN
-            IF SQLCODE != -942 THEN
-                RAISE;
-            END IF;
+        BEGIN
+            EXECUTE IMMEDIATE 'DROP TABLE ' || t.table_name || ' CASCADE CONSTRAINTS';
+        EXCEPTION
+            WHEN OTHERS THEN
+                IF SQLCODE != -942 THEN
+                    RAISE;
+                END IF;
+        END;  -- End the inner BEGIN/EXCEPTION block
     END LOOP;
 END;
 /
+
 
 -- Create tables
 CREATE TABLE CUSTOMERS (
@@ -51,7 +54,8 @@ CREATE TABLE PLANT_BEDS (
     capacity NUMBER,
     greenhouse_id NUMBER REFERENCES GREENHOUSES(greenhouse_id),
     crop_type_id NUMBER REFERENCES CROP_TYPES(crop_type_id),
-    growth_cycle_id NUMBER
+    growth_cycle_id NUMBER,
+    planted_quantity NUMBER
 );
 
 CREATE TABLE GROWTH_CYCLE (
@@ -105,10 +109,14 @@ CREATE TABLE ORDER_ITEMS (
     quantity_kg DECIMAL(10, 2)
 );
 
+
+
 -- Add foreign key after both tables exist
 ALTER TABLE HARVESTED_CROPS ADD CONSTRAINT fk_order_item 
     FOREIGN KEY (order_item_id) REFERENCES ORDER_ITEMS(order_item_id);
-
+    
+    
+    
     ALTER TABLE CUSTOMERS 
 ADD CONSTRAINT unique_customer_email 
     UNIQUE (email);
@@ -141,40 +149,21 @@ ALTER TABLE ORDER_ITEMS
 ADD CONSTRAINT chk_order_item_quantity 
     CHECK (quantity_kg > 0);
 
+
 ALTER TABLE GROWTH_CYCLE 
 ADD CONSTRAINT chk_growth_cycle_stage 
     CHECK (stage IN ('Seedling', 'Vegetative', 'Flowering', 'Harvest'));
-
-
--- Create useful views
-CREATE OR REPLACE VIEW crop_status AS
-SELECT 
-    ct.crop_name,
-    pb.slot_code,
-    gh.location as greenhouse_location,
-    gc.stage,
-    gc.start_date,
-    gc.end_date
-FROM PLANT_BEDS pb
-JOIN GREENHOUSES gh ON pb.greenhouse_id = gh.greenhouse_id
-JOIN CROP_TYPES ct ON pb.crop_type_id = ct.crop_type_id
-JOIN GROWTH_CYCLE gc ON pb.growth_cycle_id = gc.growth_cycle_id;
-
-CREATE OR REPLACE VIEW sensor_statistics AS
-SELECT 
-    s.sensor_type,
-    pb.slot_code,
-    gh.location as greenhouse_location,
-    AVG(sl.reading_value) as avg_reading,
-    MIN(sl.reading_value) as min_reading,
-    MAX(sl.reading_value) as max_reading
-FROM SENSOR_LOGS sl
-JOIN SENSORS s ON sl.sensor_id = s.sensor_id
-JOIN PLANT_BEDS pb ON s.plant_bed_id = pb.plant_bed_id
-JOIN GREENHOUSES gh ON pb.greenhouse_id = gh.greenhouse_id
-GROUP BY s.sensor_type, pb.slot_code, gh.location;
-
-COMMIT;
-
-
-
+    
+    
+--    
+---- synoonyms 
+---- Create public synonyms for easier access
+CREATE PUBLIC SYNONYM CUSTOMERS FOR project.CUSTOMERS;
+CREATE PUBLIC SYNONYM ORDERS FOR project.ORDERS;
+CREATE PUBLIC SYNONYM ORDER_ITEMS FOR project.ORDER_ITEMS;
+CREATE PUBLIC SYNONYM SENSORS FOR project.SENSORS;
+CREATE PUBLIC SYNONYM SENSOR_LOGS FOR project.SENSOR_LOGS;
+CREATE PUBLIC SYNONYM CROP_TYPES FOR project.CROP_TYPES;
+CREATE PUBLIC SYNONYM GROWTH_CYCLE FOR project.GROWTH_CYCLE;
+CREATE PUBLIC SYNONYM GREENHOUSES FOR project.GREENHOUSES;
+CREATE PUBLIC SYNONYM PLANT_BEDS FOR project.PLANT_BEDS;
