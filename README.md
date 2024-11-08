@@ -47,7 +47,11 @@ Password :Salespassword20#
  - `Execute insert_customers_data.sql`
 
 ## View Creation 
-7 - To create views,
+7 - To create views, Log back in as admin, 
+
+User name : hydro_admin,
+Password : NeuBoston2024#
+
  - `Execute create_views.sql`
 
 ### Notes
