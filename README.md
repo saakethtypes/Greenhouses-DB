@@ -17,7 +17,7 @@ Password : NeuBoston2024#
 
  - `Execute create_users.sql`
  - `Execute create_tables.sql`
- - `Execute create_grants.sql`
+ - `Execute role_grants.sql`
 All roles and user accounts created along with tables , relationship constraints & custom buisiness contstraints.
  
 ## Data Creation
@@ -50,6 +50,10 @@ Password :Salespassword20#
 7 - To create views,
  - `Execute create_views.sql`
 
+### Notes
+- Only for plant bed 1  the sensor logs have been inserted ( 20 rows) for view purposes.
+- Go through steps 1 - 7 sequentially to avoid missing parent key errors.
+  
 Thank You. 
 
 Team 17  - Saaketh Ch , Satwika M , Likhith NG
