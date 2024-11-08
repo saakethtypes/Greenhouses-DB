@@ -1,13 +1,13 @@
--- View: Customer Purchase History (with price included, no harvest date or harvested quantity)
-CREATE OR REPLACE VIEW hydro_admin.Customer_Purchase_History AS
+      
+       
+/////
+-- View: Customer Total Purchase History
+CREATE OR REPLACE VIEW Customer_Total_Purchase_History AS
 SELECT 
        c.customer_id, 
        c.first_name, 
        c.last_name, 
-       ct.crop_name, 
-       oi.quantity_kg AS purchased_quantity,
-       o.order_date,
-       ct.price_per_100g AS price_per_100g
+       SUM(oi.quantity_kg * ct.price_per_100g * 10) AS total_purchase_value
 FROM 
        hydro_admin.Customers c
 JOIN 
@@ -18,8 +18,11 @@ JOIN
        hydro_admin.Harvested_Crops hc ON oi.harvest_id = hc.harvest_id
 JOIN 
        hydro_admin.Crop_Types ct ON hc.crop_type_id = ct.crop_type_id
+GROUP BY 
+       c.customer_id, c.first_name, c.last_name
 ORDER BY 
-       c.customer_id, o.order_date;
+       total_purchase_value DESC;
+
 
 
 -- View: Monthly Sales by Crop (total_revenue with $ sign at the end)
@@ -28,7 +31,7 @@ SELECT
        ct.crop_name, 
        TO_CHAR(o.order_date, 'YYYY-MM') AS sale_month,
        SUM(oi.quantity_kg) AS total_quantity_sold,
-       TO_CHAR(ROUND(SUM(oi.quantity_kg * ct.price_per_100g / 100), 2), '99999.99') || ' $' AS total_revenue
+       TO_CHAR(ROUND(SUM(oi.quantity_kg * ct.price_per_100g * 10), 2), '99999.99') || ' $' AS total_revenue
 FROM 
        Orders o
 JOIN 
@@ -43,25 +46,7 @@ ORDER BY
        sale_month, ct.crop_name;
 
 
--- View: Average Sensor Readings Per Bed (both humidity and temperature for each plant bed)
-CREATE OR REPLACE VIEW Avg_Sensor_Readings_Per_Bed AS
-SELECT 
-       pb.plant_bed_id,
-       s.sensor_type,
-       ROUND(AVG(sl.reading_value), 2) AS avg_reading
-FROM 
-       Sensors s
-JOIN 
-       Sensor_Logs sl ON s.sensor_id = sl.sensor_id
-JOIN 
-       Plant_Beds pb ON s.plant_bed_id = pb.plant_bed_id
-GROUP BY 
-       pb.plant_bed_id, s.sensor_type
-ORDER BY 
-       pb.plant_bed_id, s.sensor_type;
 
-
--- View: Plant Bed Utilization (with visual progress bar for percentage)
 CREATE OR REPLACE VIEW Plant_Bed_Utilization AS
 SELECT 
        g.location AS greenhouse_location,
@@ -70,7 +55,9 @@ SELECT
        pb.capacity,
        pb.planted_quantity,
        ROUND((pb.planted_quantity / pb.capacity) * 100, 2) AS utilization_percentage,
-       RPAD('[' || RPAD('=', ROUND((pb.planted_quantity / pb.capacity) * 10, 0), '=') || '>', 10, ' ') || ']', 12) AS progress_bar
+       '[' || RPAD('=', ROUND((pb.planted_quantity / pb.capacity) * 10), '=') || 
+       LPAD('>', CASE WHEN ROUND((pb.planted_quantity / pb.capacity) * 10) < 10 THEN 1 ELSE 0 END, ' ') || 
+       RPAD(' ', 10 - ROUND((pb.planted_quantity / pb.capacity) * 10), ' ') || ']' AS progress_bar
 FROM 
        Greenhouses g
 JOIN 
@@ -79,3 +66,60 @@ JOIN
        Crop_Types ct ON pb.crop_type_id = ct.crop_type_id
 ORDER BY 
        greenhouse_location, pb.plant_bed_id;
+       
+       
+////
+-- View: Crop Sales Summary
+CREATE OR REPLACE VIEW Crop_Sales_Summary AS
+SELECT 
+       ct.crop_name,
+       SUM(pb.planted_quantity) AS total_planted_quantity,
+       SUM(hc.quantity_kg) AS total_harvested_kg,
+       SUM(oi.quantity_kg) AS total_sold_kg,
+       ROUND(SUM(oi.quantity_kg * ct.price_per_100g * 10), 2) AS total_revenue_generated
+FROM 
+       hydro_admin.Crop_Types ct
+JOIN 
+       hydro_admin.Plant_Beds pb ON ct.crop_type_id = pb.crop_type_id
+JOIN 
+       hydro_admin.Harvested_Crops hc ON pb.crop_type_id = hc.crop_type_id
+JOIN 
+       hydro_admin.Order_Items oi ON hc.harvest_id = oi.harvest_id
+GROUP BY 
+       ct.crop_name
+ORDER BY 
+       total_revenue_generated DESC;
+
+
+
+
+
+
+CREATE OR REPLACE VIEW Greenhouse_Growth_Env_Summary AS
+SELECT 
+    g.location AS greenhouse_location,
+    ct.crop_name,
+    pb.plant_bed_id,
+    pb.capacity,
+    pb.planted_quantity,
+    ROUND((pb.planted_quantity / pb.capacity) * 100, 2) AS utilization_percentage,
+    gc.stage AS current_growth_stage,
+    ROUND(AVG(CASE WHEN s.sensor_type = 'Temperature' THEN sl.reading_value END), 2) AS Sensor1_avg_temp,
+    ROUND(AVG(CASE WHEN s.sensor_type = 'Humidity' THEN sl.reading_value END), 2) AS Sensor1_avg_humidity
+FROM 
+    hydro_admin.Greenhouses g
+JOIN 
+    hydro_admin.Plant_Beds pb ON g.greenhouse_id = pb.greenhouse_id
+JOIN 
+    hydro_admin.Crop_Types ct ON pb.crop_type_id = ct.crop_type_id
+JOIN 
+    hydro_admin.Growth_Cycle gc ON pb.growth_cycle_id = gc.growth_cycle_id
+LEFT JOIN 
+    hydro_admin.Sensors s ON pb.plant_bed_id = s.plant_bed_id
+LEFT JOIN 
+    hydro_admin.Sensor_Logs sl ON s.sensor_id = sl.sensor_id
+GROUP BY 
+    g.location, ct.crop_name, pb.plant_bed_id, pb.capacity, pb.planted_quantity, gc.stage
+ORDER BY 
+    g.location, pb.plant_bed_id;
+    
