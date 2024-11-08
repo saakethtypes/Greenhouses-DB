@@ -9,8 +9,10 @@ Password : your_password
 Admin account created
    
 2 - Login as project admin to setup the table, roles & users
+
 User name : hydro_admin,
 Password : NeuBoston2024#
+
  - `Execute create_users.sql`
  - `Execute create_tables.sql`
 All roles and user accounts created along with tables
