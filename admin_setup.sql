@@ -61,4 +61,4 @@ GRANT UPDATE ANY TABLE TO hydro_admin;
 GRANT DELETE ANY TABLE TO hydro_admin;
 GRANT CREATE PUBLIC SYNONYM TO hydro_admin;
 
-//drop user hydro_admin cascade;
+--drop user hydro_admin cascade;
