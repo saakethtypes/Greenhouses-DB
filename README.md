@@ -17,8 +17,9 @@ Password : NeuBoston2024#
 
  - `Execute create_users.sql`
  - `Execute create_tables.sql`
-All roles and user accounts created along with tables
-
+ - 
+All roles and user accounts created along with tables , relationship constraints & custom buisiness contstraints.
+ 
 ## Data Creation
 As a project admin they setup the Greenhouses & Plant Beds.
 3 - Stay logged in as project admin to insert admin related data. 
