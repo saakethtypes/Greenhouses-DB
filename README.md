@@ -17,7 +17,7 @@ Password : NeuBoston2024#
 
  - `Execute create_users.sql`
  - `Execute create_tables.sql`
- - 
+ - `Execute create_grants.sql`
 All roles and user accounts created along with tables , relationship constraints & custom buisiness contstraints.
  
 ## Data Creation
