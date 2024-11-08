@@ -35,7 +35,7 @@ GRANT ALTER USER TO hydro_admin;
 
 
 GRANT DROP ANY TABLE TO hydro_admin;
-ALTER USER PROJECT QUOTA UNLIMITED ON DATA;
+ALTER USER hydro_admin QUOTA UNLIMITED ON DATA;
 
 GRANT CREATE SESSION TO hydro_admin;
 GRANT CREATE SESSION TO hydro_technician;
@@ -61,3 +61,4 @@ GRANT UPDATE ANY TABLE TO hydro_admin;
 GRANT DELETE ANY TABLE TO hydro_admin;
 GRANT CREATE PUBLIC SYNONYM TO hydro_admin;
 
+//drop user hydro_admin cascade;
