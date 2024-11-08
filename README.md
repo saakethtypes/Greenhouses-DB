@@ -52,7 +52,7 @@ Password :Salespassword20#
 User name : hydro_admin,
 Password : NeuBoston2024#
 
- - `Execute create_views.sql`
+ - `Execute view_creation.sql`
 
 ### Notes
 - Only for plant bed 1  the sensor logs have been inserted ( 20 rows) for view purposes.
