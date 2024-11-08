@@ -15,7 +15,7 @@ Admin account created
 User name : hydro_admin,
 Password : NeuBoston2024#
 
- - `Execute create_users.sql`
+ - `Execute user_creation.sql`
  - `Execute create_tables.sql`
  - `Execute role_grants.sql`
 All roles and user accounts created along with tables , relationship constraints & custom buisiness contstraints.
