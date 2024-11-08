@@ -57,7 +57,8 @@ Password : NeuBoston2024#
 ### Notes
 - Only for plant bed 1  the sensor logs have been inserted ( 20 rows) for view purposes.
 - Go through steps 1 - 7 sequentially to avoid missing parent key errors.
-- Files `user_creation.sql` ,`create_tables.sql`, `admin_setup.sql` have clean up scripts and can be rerun. 
+- Files `user_creation.sql` ,`create_tables.sql`, `admin_setup.sql` have clean up scripts and can be rerun.
+- To rerun anytime after `user_creation.sql` just in case `Execute drop user hydro_admin cascade`
   
 Thank You. 
 
