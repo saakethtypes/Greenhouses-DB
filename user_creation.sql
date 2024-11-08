@@ -84,6 +84,7 @@ BEGIN
    FOR user_quota IN (
        SELECT 'hydro_technician' AS user_name, '50M' AS quota FROM dual UNION ALL
        SELECT 'hydro_agronomist' AS user_name, '50M' AS quota FROM dual UNION ALL
+   
        SELECT 'hydro_sales_manager' AS user_name, '50M' AS quota FROM dual UNION ALL
        SELECT 'hydro_customer' AS user_name, '20M' AS quota FROM dual
    ) LOOP
