@@ -46,11 +46,9 @@ Password :Salespassword20#
  - `Execute insert_customers_data.sql`
 
 ## View Creation 
-7 - To create views, stay logged in as sales manager.
+7 - To create views,
  - `Execute create_views.sql`
 
 Thank You. 
-Team 17 
-Saaketh Ch 
-Satwika M
-Likhith NG
+
+Team 17  - Saaketh Ch , Satwika M , Likhith NG
