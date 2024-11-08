@@ -52,9 +52,11 @@ INSERT INTO hydro_admin.HARVESTED_CROPS (harvest_id, crop_type_id, harvest_date,
 INSERT INTO hydro_admin.HARVESTED_CROPS (harvest_id, crop_type_id, harvest_date, quantity_kg, available_quantity_kg, growth_cycle_id, order_item_id) VALUES
 (5, 5, DATE '2024-03-05', 50.00, 40.00, 5, NULL);
 
-UPDATE hydro_admin.HARVESTED_CROPS SET order_item_id = 1 WHERE harvest_id = 1;
-UPDATE hydro_admin.HARVESTED_CROPS SET order_item_id = 2 WHERE harvest_id = 2;
-UPDATE hydro_admin.HARVESTED_CROPS SET order_item_id = 3 WHERE harvest_id = 3;
-UPDATE hydro_admin.HARVESTED_CROPS SET order_item_id = 4 WHERE harvest_id = 4;
-UPDATE hydro_admin.HARVESTED_CROPS SET order_item_id = 5 WHERE harvest_id = 5;
+
+-- Update planted quantities in plant beds
+UPDATE hydro_admin.PLANT_BEDS SET planted_quantity = 25 WHERE plant_bed_id = 1;
+UPDATE hydro_admin.PLANT_BEDS SET planted_quantity = 30 WHERE plant_bed_id = 2;
+UPDATE hydro_admin.PLANT_BEDS SET planted_quantity = 35 WHERE plant_bed_id = 3;
+UPDATE hydro_admin.PLANT_BEDS SET planted_quantity = 40 WHERE plant_bed_id = 4;
+UPDATE hydro_admin.PLANT_BEDS SET planted_quantity = 20 WHERE plant_bed_id = 5;
 
