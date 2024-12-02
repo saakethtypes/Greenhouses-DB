@@ -18,6 +18,7 @@ Password : NeuBoston2024#
  - `Execute user_creation.sql`
  - `Execute create_tables.sql`
  - `Execute role_grants.sql`
+ - `Execute stored_procedures.sql`
 All roles and user accounts created along with tables , relationship constraints & custom buisiness contstraints.
  
 ## Data Creation
@@ -44,7 +45,7 @@ Password :Techpassword20#
 User name : hydro_sales_manager,
 Password :Salespassword20#
 
- - `Execute insert_customers_data.sql`
+ - `Execute insert_manager_data.sql`
 
 ## View Creation 
 7 - To create views, Log back in as admin, 
@@ -52,7 +53,7 @@ Password :Salespassword20#
 User name : hydro_admin,
 Password : NeuBoston2024#
 
- - `Execute view_creation.sql`
+ - `Execute report_creation.sql`
 
 ### Notes
 - Only for plant bed 1  the sensor logs have been inserted ( 20 rows) for view purposes.
