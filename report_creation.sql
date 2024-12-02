@@ -1,6 +1,3 @@
-      
-       
-/////
 -- View: Customer Total Purchase History
 CREATE OR REPLACE VIEW Customer_Total_Purchase_History AS
 SELECT 
@@ -67,8 +64,6 @@ JOIN
 ORDER BY 
        greenhouse_location, pb.plant_bed_id;
        
-       
-////
 -- View: Crop Sales Summary
 CREATE OR REPLACE VIEW Crop_Sales_Summary AS
 SELECT 
@@ -89,10 +84,6 @@ GROUP BY
        ct.crop_name
 ORDER BY 
        total_revenue_generated DESC;
-
-
-
-
 
 
 CREATE OR REPLACE VIEW Greenhouse_Growth_Env_Summary AS
@@ -122,4 +113,33 @@ GROUP BY
     g.location, ct.crop_name, pb.plant_bed_id, pb.capacity, pb.planted_quantity, gc.stage
 ORDER BY 
     g.location, pb.plant_bed_id;
-    
+
+
+
+
+--Report with Greenhouse, Plants, and Beds
+--Purpose: Displays details about greenhouses, their plant beds, and crop planting to analyze utilization and crop distribution.
+SELECT 
+    g.greenhouse_id AS greenhouse_id,
+    g.location AS greenhouse_location,
+    g.total_slots AS total_slots_in_greenhouse,
+    pb.plant_bed_id AS plant_bed_id,
+    pb.slot_code AS plant_bed_slot_code,
+    pb.capacity AS plant_bed_capacity,
+    pb.planted_quantity AS planted_quantity_in_bed,
+    ct.crop_type_id AS crop_type_id,
+    ct.crop_name AS crop_name,
+    ct.growing_conditions AS crop_growing_conditions,
+    gc.stage AS growth_cycle_stage,
+    gc.start_date AS growth_cycle_start_date,
+    gc.end_date AS growth_cycle_end_date
+FROM 
+    GREENHOUSES g
+JOIN 
+    PLANT_BEDS pb ON g.greenhouse_id = pb.greenhouse_id
+LEFT JOIN 
+    CROP_TYPES ct ON pb.crop_type_id = ct.crop_type_id
+LEFT JOIN 
+    GROWTH_CYCLE gc ON pb.growth_cycle_id = gc.growth_cycle_id
+ORDER BY 
+    g.greenhouse_id, pb.plant_bed_id;
