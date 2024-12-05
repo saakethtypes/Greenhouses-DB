@@ -1,43 +1,3 @@
----- Fixed Growth Stage Progression Trigger
---CREATE OR REPLACE TRIGGER trg_growth_stage_progress
---AFTER UPDATE ON growth_cycle
---FOR EACH ROW
---WHEN (NEW.stage != 'Harvest')
---DECLARE
---    v_harvest_time NUMBER;
---    v_days_elapsed NUMBER;
---    v_next_stage VARCHAR2(20);
---BEGIN
---    -- Get harvest time for this crop
---    SELECT harvest_time_days 
---    INTO v_harvest_time
---    FROM crop_types 
---    WHERE crop_type_id = :NEW.crop_type_id;
---    
---    v_days_elapsed := SYSDATE - :NEW.start_date;
---    
---    -- Calculate progression based on elapsed time
---    IF :NEW.stage = 'Seedling' AND v_days_elapsed >= (v_harvest_time * 0.25) THEN
---        v_next_stage := 'Vegetative';
---    ELSIF :NEW.stage = 'Vegetative' AND v_days_elapsed >= (v_harvest_time * 0.5) THEN
---        v_next_stage := 'Flowering';
---    ELSIF :NEW.stage = 'Flowering' AND v_days_elapsed >= v_harvest_time THEN
---        v_next_stage := 'Harvest';
---    END IF;
---    
---    -- Update to next stage if needed
---    IF v_next_stage IS NOT NULL THEN
---        UPDATE growth_cycle
---        SET stage = v_next_stage
---        WHERE growth_cycle_id = :NEW.growth_cycle_id;
---    END IF;
---END;
-
---/
-
-SHOW ERRORS;
-
--- Now let's create queries to view data in all tables
 CREATE OR REPLACE PACKAGE data_view_pkg IS
     PROCEDURE show_all_data;
 END data_view_pkg;
@@ -212,3 +172,127 @@ GRANT EXECUTE ON data_view_pkg TO agronomist_role, sales_manager_role, technicia
 
 -- To use it:
 EXEC data_view_pkg.show_all_data;
+
+
+CREATE OR REPLACE PROCEDURE print_schema_objects IS
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('=== HYDRO_ADMIN Schema Objects ===');
+    DBMS_OUTPUT.PUT_LINE('');
+    
+    -- Print Packages and their contents
+    FOR pkg_rec IN (
+        SELECT DISTINCT object_name 
+        FROM user_objects 
+        WHERE object_type = 'PACKAGE'
+        ORDER BY object_name
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('? Package: ' || pkg_rec.object_name);
+        
+        -- Get package procedures using ALL_PROCEDURES
+        FOR proc_rec IN (
+            SELECT DISTINCT subprogram_id, procedure_name
+            FROM all_procedures
+            WHERE object_type = 'PACKAGE'
+            AND object_name = pkg_rec.object_name
+            AND owner = USER
+            AND procedure_name IS NOT NULL
+            ORDER BY subprogram_id
+        ) LOOP
+            DBMS_OUTPUT.PUT_LINE('  ?? ' || proc_rec.procedure_name);
+            
+            -- Get arguments for this procedure
+            FOR arg_rec IN (
+                SELECT argument_name, data_type, position, in_out
+                FROM all_arguments
+                WHERE package_name = pkg_rec.object_name
+                AND object_name = proc_rec.procedure_name
+                AND owner = USER
+                ORDER BY position
+            ) LOOP
+                IF arg_rec.argument_name IS NOT NULL THEN
+                    DBMS_OUTPUT.PUT_LINE('      ' || RPAD(arg_rec.argument_name, 30) || 
+                                       ' ' || arg_rec.in_out || ' ' || arg_rec.data_type);
+                END IF;
+            END LOOP;
+        END LOOP;
+        DBMS_OUTPUT.PUT_LINE('');
+    END LOOP;
+
+    -- Print Standalone Procedures
+    DBMS_OUTPUT.PUT_LINE('=== Standalone Procedures ===');
+    FOR proc_rec IN (
+        SELECT object_name 
+        FROM user_objects 
+        WHERE object_type = 'PROCEDURE'
+        AND object_name NOT LIKE 'SYS_%'
+        ORDER BY object_name
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('? ' || proc_rec.object_name);
+        
+        -- Get procedure arguments
+        FOR arg_rec IN (
+            SELECT argument_name, data_type, position, in_out
+            FROM all_arguments
+            WHERE object_name = proc_rec.object_name
+            AND package_name IS NULL
+            AND owner = USER
+            ORDER BY position
+        ) LOOP
+            IF arg_rec.argument_name IS NOT NULL THEN
+                DBMS_OUTPUT.PUT_LINE('    ' || RPAD(arg_rec.argument_name, 30) || 
+                                   ' ' || arg_rec.in_out || ' ' || arg_rec.data_type);
+            END IF;
+        END LOOP;
+        DBMS_OUTPUT.PUT_LINE('');
+    END LOOP;
+
+    -- Print Functions
+    DBMS_OUTPUT.PUT_LINE('=== Functions ===');
+    FOR func_rec IN (
+        SELECT object_name 
+        FROM user_objects 
+        WHERE object_type = 'FUNCTION'
+        AND object_name NOT LIKE 'SYS_%'
+        ORDER BY object_name
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('? ' || func_rec.object_name);
+        
+        -- Get function arguments
+        FOR arg_rec IN (
+            SELECT argument_name, data_type, position, in_out
+            FROM all_arguments
+            WHERE object_name = func_rec.object_name
+            AND package_name IS NULL
+            AND owner = USER
+            ORDER BY position
+        ) LOOP
+            IF arg_rec.argument_name IS NOT NULL THEN
+                DBMS_OUTPUT.PUT_LINE('    ' || RPAD(arg_rec.argument_name, 30) || 
+                                   ' ' || arg_rec.in_out || ' ' || arg_rec.data_type);
+            END IF;
+        END LOOP;
+        DBMS_OUTPUT.PUT_LINE('');
+    END LOOP;
+
+    -- Print Triggers
+    DBMS_OUTPUT.PUT_LINE('=== Triggers ===');
+    FOR trg_rec IN (
+        SELECT trigger_name, triggering_event, table_name, status
+        FROM user_triggers
+        WHERE trigger_name NOT LIKE 'SYS_%'
+        ORDER BY trigger_name
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('? ' || trg_rec.trigger_name);
+        DBMS_OUTPUT.PUT_LINE('    Table: ' || trg_rec.table_name);
+        DBMS_OUTPUT.PUT_LINE('    Event: ' || trg_rec.triggering_event);
+        DBMS_OUTPUT.PUT_LINE('    Status: ' || trg_rec.status);
+        DBMS_OUTPUT.PUT_LINE('');
+    END LOOP;
+END;
+/
+
+-- Execute the procedure
+BEGIN
+    print_schema_objects;
+END;
+/
