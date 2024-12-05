@@ -27,7 +27,7 @@ CREATE OR REPLACE PACKAGE BODY hydro_admin.initial_data_pkg IS
         crop_mgmt_pkg.insert_crop_type('English Cucumber', 'Temp: 22-28°C, Humidity: 70-80%, pH: 5.5-6.0', 25, 3.75, v_crop_type_id);
         crop_mgmt_pkg.insert_crop_type('Fresh Basil', 'Temp: 20-25°C, Humidity: 60-65%, pH: 5.5-6.5', 17, 5.00, v_crop_type_id);
         crop_mgmt_pkg.insert_crop_type('Baby Spinach', 'Temp: 16-20°C, Humidity: 60-70%, pH: 6.0-7.0', 7, 4.50, v_crop_type_id);
-        crop_mgmt_pkg.insert_crop_type('Bell Peppers', 'Temp: 20-25°C, Humidity: 65-75%, pH: 5.5-6.5', 30, 4.75, v_crop_type_id);
+--        crop_mgmt_pkg.insert_crop_type('Bell Peppers', 'Temp: 20-25°C, Humidity: 65-75%, pH: 5.5-6.5', 30, 4.75, v_crop_type_id);
 
         -- 3. Create Customers (sales_manager_role)
         DBMS_OUTPUT.PUT_LINE('Creating Customers...');
@@ -36,6 +36,13 @@ CREATE OR REPLACE PACKAGE BODY hydro_admin.initial_data_pkg IS
         customer_mgmt_pkg.register_customer('James', 'Wilson', 'j.wilson@email.com', '555-0103', '789 Beacon St, Boston, MA');
         customer_mgmt_pkg.register_customer('Emily', 'Chen', 'e.chen@email.com', '555-0104', '321 Newbury St, Boston, MA');
         customer_mgmt_pkg.register_customer('David', 'Miller', 'd.miller@email.com', '555-0105', '654 Camelback Rd, Phoenix, AZ');
+        customer_mgmt_pkg.register_customer('Fresh', 'Wholesale', 'orders@freshwholesale.com', '555-9001', '789 Distribution Ave, Miami, FL');
+        customer_mgmt_pkg.register_customer('Green', 'Wholesale', 'buying@greenwholesale.com', '555-9002', '456 Market St, Boston, MA');
+        customer_mgmt_pkg.register_customer('Prime', 'Wholesale', 'orders@primewholesale.com', '555-9003', '123 Commerce Dr, Phoenix, AZ');
+        customer_mgmt_pkg.register_customer('Sarah', 'Johnson', 's.johnson@email.com', '555-0201', '789 Pine St, Miami, FL');
+        customer_mgmt_pkg.register_customer('Michael', 'Chen', 'm.chen@email.com', '555-0202', '321 Oak Ave, Boston, MA');
+        customer_mgmt_pkg.register_customer('Emily', 'Brown', 'e.brown@email.com', '555-0203', '456 Maple Dr, Phoenix, AZ');
+        customer_mgmt_pkg.register_customer('Lisa', 'Taylor', 'l.taylor@email.com', '555-0205', '654 Birch Rd, Boston, MA');
 
         -- 4. Create Plant Beds
         DBMS_OUTPUT.PUT_LINE('Creating Plant Beds...');
@@ -80,7 +87,6 @@ CREATE OR REPLACE PACKAGE BODY hydro_admin.initial_data_pkg IS
             sensor_mgmt_pkg.install_sensor(bed.plant_bed_id, 'PH', v_sensor_id);
         END LOOP;
 
-        -- 6. Create Initial Growth Cycles (randomly assign crops to some plant beds)
         -- 6. Create Initial Growth Cycles (randomly assign crops to some plant beds)
             DBMS_OUTPUT.PUT_LINE('Creating Initial Growth Cycles...');
             FOR bed IN (
