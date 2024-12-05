@@ -2,45 +2,6 @@
 SET SERVEROUTPUT ON;
 WHENEVER SQLERROR EXIT SQL.SQLCODE;
 
-
-BEGIN
-   FOR syn IN (SELECT synonym_name FROM all_synonyms WHERE owner = 'HYDRO_ADMIN') LOOP
-      EXECUTE IMMEDIATE 'DROP SYNONYM HYDRO_ADMIN.' || syn.synonym_name;
-   END LOOP;
-   
-    -- Drop synonym if exists
-    FOR syn IN (SELECT synonym_name FROM all_synonyms WHERE synonym_name IN ('ORDER_ITEMS', 'SENSOR_LOGS', 'SENSORS', 'ORDERS', 
-                                   'HARVESTED_CROPS', 'GROWTH_CYCLE', 'PLANT_BEDS', 
-                                   'CROP_TYPES', 'GREENHOUSES', 'CUSTOMERS') AND owner = 'PUBLIC') 
-    LOOP
-        EXECUTE IMMEDIATE 'DROP PUBLIC SYNONYM ' || syn.synonym_name;
-    END LOOP;
-END;
-/
-
-
--- Clean up existing objects and tables
-BEGIN
-    -- Drop tables in correct order to handle dependencies
-    FOR t IN (SELECT table_name 
-              FROM user_tables 
-              WHERE table_name IN ('ORDER_ITEMS', 'SENSOR_LOGS', 'SENSORS', 'ORDERS', 
-                                   'HARVESTED_CROPS', 'GROWTH_CYCLE', 'PLANT_BEDS', 
-                                   'CROP_TYPES', 'GREENHOUSES', 'CUSTOMERS')) 
-    LOOP
-        BEGIN
-            EXECUTE IMMEDIATE 'DROP TABLE ' || t.table_name || ' CASCADE CONSTRAINTS';
-        EXCEPTION
-            WHEN OTHERS THEN
-                IF SQLCODE != -942 THEN
-                    RAISE;
-                END IF;
-        END;  -- End the inner BEGIN/EXCEPTION block
-    END LOOP;
-END;
-/
-
-
 -- Create tables
 CREATE TABLE CUSTOMERS (
     customer_id INTEGER PRIMARY KEY,
@@ -138,9 +99,9 @@ ALTER TABLE HARVESTED_CROPS ADD CONSTRAINT fk_order_item
 ADD CONSTRAINT unique_customer_email 
     UNIQUE (email);
 
-ALTER TABLE PLANT_BEDS 
-ADD CONSTRAINT unique_crop_per_bed_per_cycle 
-    UNIQUE (plant_bed_id, growth_cycle_id);
+--ALTER TABLE PLANT_BEDS 
+--ADD CONSTRAINT unique_crop_per_bed_per_cycle 
+--    UNIQUE (plant_bed_id, growth_cycle_id);
 
 ALTER TABLE SENSORS 
 ADD CONSTRAINT unique_sensor_per_bed 
@@ -175,10 +136,10 @@ ADD CONSTRAINT chk_growth_cycle_stage
 --    
 ---- synoonyms 
 ------ Create public synonyms for easier access
-CREATE PUBLIC SYNONYM CUSTOMERS FOR hydro_admin.CUSTOMERS;
-CREATE PUBLIC SYNONYM ORDERS FOR hydro_admin.ORDERS;
-CREATE PUBLIC SYNONYM ORDER_ITEMS FOR hydro_admin.ORDER_ITEMS;
-CREATE PUBLIC SYNONYM SENSORS FOR hydro_admin.SENSORS;
+CREATE PUBLIC SYNONYM CUSTOMERS FOR hydro_admin.CUSTOMERS; --
+CREATE PUBLIC SYNONYM ORDERS FOR hydro_admin.ORDERS; --
+CREATE PUBLIC SYNONYM ORDER_ITEMS FOR hydro_admin.ORDER_ITEMS; --
+CREATE PUBLIC SYNONYM SENSORS FOR hydro_admin.SENSORS; 
 CREATE PUBLIC SYNONYM SENSOR_LOGS FOR hydro_admin.SENSOR_LOGS;
 CREATE PUBLIC SYNONYM CROP_TYPES FOR hydro_admin.CROP_TYPES;
 CREATE PUBLIC SYNONYM GROWTH_CYCLE FOR hydro_admin.GROWTH_CYCLE;
