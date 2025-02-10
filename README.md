@@ -1,7 +1,18 @@
 # DMDD-project-team_17
 
-# Steps to Execute 
-## Project Setup
+## Project ER 
+
+![Screenshot 2024-10-22 at 7 02 15 PM (1)](https://github.com/user-attachments/assets/8551f81b-48a2-42c6-96f3-b484bbf4047f)
+
+
+
+## Project DataFlow
+
+
+![IMG_8079 (1)](https://github.com/user-attachments/assets/d1789306-bfd8-42ef-8a95-5b9b01ded898)
+
+
+## Setup Guide
 1 - Login as Admin to setup an admin account for the project 
 
 User name : ADMIN,
@@ -21,27 +32,16 @@ Password : NeuBoston2024#
  - `Execute stored_procedures.sql`
 All roles and user accounts created along with tables , relationship constraints & custom buisiness contstraints.
  
-## Data Creation
+## Crop growth simulations
 As a project admin they setup the Greenhouses & Plant Beds.
 3 - Stay logged in as project admin to insert admin related data. 
  - `Execute insert_admin_data.sql` 
 4- To simulate the entire data insertion process please run.
    - `Execute project_simulation.sql` 
 
-## View Creation 
+## View Reports
 7 - To create views, Log back in as admin, 
 
 User name : hydro_admin,
 Password : NeuBoston2024#
-
- - `Execute reports.sql`
-
-### Notes
-- Only for plant bed 1  the sensor logs have been inserted ( 20 rows) for view purposes.
-- Go through steps 1 - 7 sequentially to avoid missing parent key errors.
-- Files `user_creation.sql` ,`create_tables.sql`, `admin_setup.sql` have clean up scripts and can be rerun.
-- To rerun anytime after `user_creation.sql` just in case `Execute drop user hydro_admin cascade`
-  
-Thank You. 
-
-Team 17  - Saaketh Ch , Satwika M , Likhith NG
+`Execute reports.sql`  
